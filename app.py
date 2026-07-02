@@ -149,7 +149,6 @@ else:
             else:
                 actual_index = None
             
-            # Düyməyə basanda brauzeri məcbur yeniləmək üçün dinamik KEY məntiqi
             radio_key = f"radio_{curr_idx}_show" if st.session_state.get("show_current_answer", False) else f"radio_{curr_idx}_hide"
             
             user_choice = st.radio(
@@ -166,4 +165,25 @@ else:
         with col_right:
             st.markdown('<div class="blue-btn">', unsafe_allow_html=True)
             if st.button("Növbəti ➡️", key="next_btn") and curr_idx < total_q - 1:
-                st.session_state.current_index = curr_idx +
+                st.session_state.current_index = curr_idx + 1
+                st.session_state.show_current_answer = False
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+            st.markdown("<br><br><br>", unsafe_allow_html=True)
+            
+            st.markdown('<div class="bitir-btn">', unsafe_allow_html=True)
+            if st.button("Bitir", key="submit_exam_btn"):
+                st.session_state.submitted = True
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    # NƏTİCƏ REJİMİ
+    elif st.session_state.get("submitted", False):
+        questions = st.session_state.exam_questions
+        correct_count = 0
+        wrong_count = 0
+        unanswered_count = 0
+        
+        for idx, q in enumerate(questions):
+            user_ans = st.session_state.user_answers
