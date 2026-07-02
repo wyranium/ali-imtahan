@@ -4,7 +4,7 @@ import random
 
 st.set_page_config(page_title="UNEC İmtahan Sistemi", layout="wide", initial_sidebar_state="expanded")
 
-# Əsas CSS Dizaynı (Xəta verən dinamik çərçivə kodu buradan tamamilə silindi)
+# Əsas CSS Dizaynı
 st.markdown("""
     <style>
     .stApp {
@@ -40,7 +40,7 @@ st.markdown("""
     .stRadio > label {
         color: #FFFFFF !important;
         font-size: 16px !important;
-    }}
+    }
     .stButton > button {
         width: 100% !important;
         background-color: #1F293D !important;
@@ -138,8 +138,7 @@ else:
             
             options = q['options']
             
-            # İndeksi təyin edirik: Əgər "Cavabı göstər" sıxılıbsa birbaşa düzgün cavabı aktiv edir, 
-            # yoxsa istifadəçinin öz seçdiyi cavabı saxlayır.
+            # Əgər "Cavabı göstər" sıxılıbsa düzgün cavabı avtomatik işarələyir
             if st.session_state.get("show_current_answer", False):
                 current_choice = q['correct']
             else:
@@ -172,5 +171,5 @@ else:
                 st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # NƏTİCƏ REJİMİ
-    elif st.session_state.get
+    # NƏTİCƏ REJİMİ (Xətalı olan və yarımçıq qalan sətir bura idi, tamamilə düzəldildi)
+    elif st.session_state.get("submitted", False):
