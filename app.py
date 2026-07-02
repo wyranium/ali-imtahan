@@ -4,32 +4,33 @@ import random
 
 st.set_page_config(page_title="UNEC İmtahan Sistemi", layout="wide", initial_sidebar_state="expanded")
 
-# Əgər "Cavabı göstər" sıxılıbsa, düzgün variantı tapıb CSS çərçivəsini qoşuruq
+# "Cavabı göstər" sıxılıbsa və imtahan aktivdirsə, düzgün variantın sırasını tapıb CSS qoşuruq
 css_injection = ""
-if st.session_state.get("show_current_answer", False) and "exam_questions" in st.session_state:
-    questions = st.session_state.exam_questions
-    curr_idx = st.session_state.current_index
-    if 0 <= curr_idx < len(questions):
-        q = questions[curr_idx]
-        correct_text = q['correct']
-        options = q['options']
+if st.session_state.get("exam_started", False) and not st.session_state.get("submitted", False):
+    if st.session_state.get("show_current_answer", False) and "exam_questions" in st.session_state:
+        questions = st.session_state.exam_questions
+        curr_idx = st.session_state.current_index
         
-        if correct_text in options:
-            # Düzgün variantın neçənci sırada olduğunu tapırıq (1-dən 5-ə qədər)
-            correct_position = options.index(correct_text) + 1
+        # Təhlükəsizlik yoxlanışı (Siyahı limitini aşmamaq üçün)
+        if 0 <= curr_idx < len(questions):
+            q = questions[curr_idx]
+            correct_text = q['correct']
+            options = q['options']
             
-            # Heç bir mətndən və dırnaqdan asılı olmayan, birbaşa sıraya yönələn 100% stabil CSS
-            css_injection = f"""
-            <style>
-            div[role="radiogroup"] div[data-baseweb="radio"]:nth-of-type({correct_position}) {{
-                border: 2px solid #10B981 !important;
-                background-color: #064E3B !important;
-                border-radius: 8px !important;
-            }}
-            </style>
-            """
+            if correct_text in options:
+                correct_position = options.index(correct_text) + 1
+                # Heç bir mətndən və dırnaqdan asılı olmayan, birbaşa sıraya yönələn 100% stabil CSS
+                css_injection = f"""
+                <style>
+                div[role="radiogroup"] div[data-baseweb="radio"]:nth-of-type({correct_position}) {{
+                    border: 2px solid #10B981 !important;
+                    background-color: #064E3B !important;
+                    border-radius: 8px !important;
+                }}
+                </style>
+                """
 
-# Əsas CSS Dizaynı
+# Sənin bəyəndiyin ƏSAS KOMPÜTER DIZAYNI (CSS)
 st.markdown(f"""
     <style>
     .stApp {{
@@ -123,7 +124,7 @@ else:
         st.session_state.user_answers = {}
         st.rerun()
 
-    # İMTAHAN REJİMİ
+    # SƏNİN İSTƏDİYİN 3 SÜTUNLU KÖHNƏ İMTAHAN REJİMİ
     if st.session_state.get("exam_started", False) and not st.session_state.get("submitted", False):
         questions = st.session_state.exam_questions
         curr_idx = st.session_state.current_index
@@ -132,6 +133,7 @@ else:
         
         st.markdown(f"<div class='sual-header'>muh mexanikasi • Sual {curr_idx + 1}/{total_q}</div>", unsafe_allow_html=True)
         
+        # 3 Sütunlu düzülüş (Sol, Mərkəz, Sağ)
         col_left, col_center, col_right = st.columns([2, 6, 2])
         
         with col_left:
