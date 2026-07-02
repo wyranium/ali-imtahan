@@ -2,9 +2,9 @@ import streamlit as st
 import json
 import random
 
-st.set_page_config(page_title="UNEC İmtahan Sistemi", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="UNEC İmtahan Sistemi", layout="wide", initial_sidebar_state="expanded")
 
-# Əgər "Cavabı göstər" sıxılıbsa, düzgün variantın sırasını tapıb CSS ilə çərçivəyə alırıq
+# Əgər "Cavabı göstər" sıxılıbsa, düzgün variantı tapıb CSS çərçivəsini qoşuruq
 css_injection = ""
 if st.session_state.get("show_current_answer", False) and "exam_questions" in st.session_state:
     questions = st.session_state.exam_questions
@@ -15,7 +15,10 @@ if st.session_state.get("show_current_answer", False) and "exam_questions" in st
         options = q['options']
         
         if correct_text in options:
+            # Düzgün variantın neçənci sırada olduğunu tapırıq (1-dən 5-ə qədər)
             correct_position = options.index(correct_text) + 1
+            
+            # Heç bir mətndən və dırnaqdan asılı olmayan, birbaşa sıraya yönələn 100% stabil CSS
             css_injection = f"""
             <style>
             div[role="radiogroup"] div[data-baseweb="radio"]:nth-of-type({correct_position}) {{
@@ -26,10 +29,9 @@ if st.session_state.get("show_current_answer", False) and "exam_questions" in st
             </style>
             """
 
-# Mobil və Kompüter üçün Xüsusi Təkmilləşdirilmiş CSS Dizaynı
+# Əsas CSS Dizaynı
 st.markdown(f"""
     <style>
-    /* Ümumi Fon və Yazı Rəngləri */
     .stApp {{
         background-color: #0B0E14;
         color: #D1D5DB;
@@ -37,39 +39,25 @@ st.markdown(f"""
     h1, h2, h3 {{
         color: #FFFFFF !important;
     }}
-    
-    /* Sual Başlığı (Üst hissə) */
     .sual-header {{
-        font-size: 16px;
+        font-size: 18px;
         color: #8892B0;
-        margin-bottom: 15px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        margin-bottom: 20px;
     }}
-    
-    /* Sual Kartı */
     .sual-karti {{
         background-color: #111622;
         border: 1px solid #1F293D;
         border-radius: 10px;
-        padding: 20px;
+        padding: 30px;
         margin-bottom: 20px;
     }}
-    .sual-karti h3 {{
-        font-size: 18px !important;
-        line-height: 1.5 !important;
-    }}
-    
-    /* Radio Düymələr (Variantlar) - Mobil üçün Genişləndirilmiş */
     div[data-baseweb="radio"] {{
         background-color: #161B26 !important;
-        padding: 16px 20px !important;
+        padding: 14px 20px !important;
         border-radius: 8px !important;
         margin-bottom: 12px !important;
         border: 1px solid #242F41 !important;
         transition: 0.1s;
-        cursor: pointer;
     }}
     div[data-baseweb="radio"]:hover {{
         border-color: #3B82F6 !important;
@@ -78,61 +66,23 @@ st.markdown(f"""
         color: #FFFFFF !important;
         font-size: 16px !important;
     }}
-    
-    /* Düymələrin Ümumi Stili (Telefonda barmaqla rahat sıxılması üçün ölçülər) */
     .stButton > button {{
         width: 100% !important;
         background-color: #1F293D !important;
         color: #FFFFFF !important;
         border: 1px solid #374151 !important;
-        border-radius: 8px !important;
-        padding: 12px 20px !important;
-        font-size: 16px !important;
-        font-weight: 500 !important;
-        min-height: 48px !important; /* Mobil klik standartı */
+        border-radius: 6px !important;
+        padding: 10px 20px !important;
     }}
-    
-    /* Göy Düymələr (Növbəti və Başla) */
     div[data-testid="stSidebar"] .stButton > button,
     .blue-btn > div > button {{
         background-color: #1D4ED8 !important;
         border: none !important;
     }}
-    .blue-btn > div > button:hover {{
-        background-color: #2563EB !important;
-    }}
-    
-    /* Bitir Düyməsi */
     .bitir-btn > div > button {{
-        background-color: #DC2626 !important; /* Daha diqqət çəkən qırmızı rəng */
+        background-color: #2563EB !important;
         font-weight: bold !important;
         border: none !important;
-    }}
-    .bitir-btn > div > button:hover {{
-        background-color: #EF4444 !important;
-    }}
-    
-    /* Naviqasiya Paneli Bloku (Mobil üçün alt-alta düşəndə məsafəni qoruyur) */
-    .nav-block {{
-        margin-top: 10px;
-        margin-bottom: 10px;
-    }}
-    
-    /* Mobil Ekranlar Üçün Xüsusi Tənzimləmələr (Ekran 768px-dən kiçik olduqda) */
-    @media (max-width: 768px) {{
-        .sual-karti {{
-            padding: 15px;
-        }}
-        .sual-karti h3 {{
-            font-size: 16px !important;
-        }}
-        div[data-baseweb="radio"] {{
-            padding: 14px 16px !important;
-        }}
-        .stButton > button {{
-            padding: 10px 15px !important;
-            font-size: 15px !important;
-        }}
     }}
     </style>
     {css_injection}
@@ -149,7 +99,7 @@ if len(all_questions) == 0:
 else:
     total_extracted = len(all_questions)
 
-    # SIDEBAR (Ayarlar paneli mobil telefonlarda ekranı tutmasın deyə gizli başlayır)
+    # SIDEBAR
     st.sidebar.markdown("### ⚙️ İmtahan Ayarları")
     st.sidebar.write(f"Ümumi sual sayısı: **{total_extracted}**")
     
@@ -180,60 +130,26 @@ else:
         total_q = len(questions)
         q = questions[curr_idx]
         
-        st.markdown(f"<div class='sual-header'>Mühəndis Mexanikası • Sual {curr_idx + 1}/{total_q}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='sual-header'>muh mexanikasi • Sual {curr_idx + 1}/{total_q}</div>", unsafe_allow_html=True)
         
-        # Sual və variantlar mərkəzdə tam genişlikdə görünür (Mobil üçün əla struktur)
-        st.markdown(f"<div class='sual-karti'><h3>{q['question']}</h3></div>", unsafe_allow_html=True)
+        col_left, col_center, col_right = st.columns([2, 6, 2])
         
-        current_choice = st.session_state.user_answers.get(curr_idx, None)
-        options = q['options']
-        
-        user_choice = st.radio(
-            f"options_{curr_idx}", 
-            options, 
-            index=options.index(current_choice) if current_choice in options else None, 
-            key=f"radio_{curr_idx}", 
-            label_visibility="collapsed"
-        )
-        
-        if user_choice:
-            st.session_state.user_answers[curr_idx] = user_choice
-            
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        # Naviqasiya və Əmrlər Düymələri (Aşağı paneldə mobilə tam uyğun yerləşmə)
-        col_nav1, col_nav2, col_nav3 = st.columns([1, 1, 1])
-        
-        with col_nav1:
-            st.markdown('<div class="nav-block">', unsafe_allow_html=True)
+        with col_left:
             if st.button("⬅️ Əvvəlki", key="prev_btn") and curr_idx > 0:
                 st.session_state.current_index -= 1
                 st.session_state.show_current_answer = False
                 st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
             
-        with col_nav2:
-            st.markdown('<div class="nav-block">', unsafe_allow_html=True)
-            if st.button("👁️ Cavab", key="show_ans_btn"):
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            # CAVABI GÖSTƏR DÜYMƏSİ
+            if st.button("👁️ Cavabı göstər", key="show_ans_btn"):
                 st.session_state.show_current_answer = not st.session_state.show_current_answer
                 st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
             
-        with col_nav3:
-            st.markdown('<div class="nav-block blue-btn">', unsafe_allow_html=True)
-            if st.button("Növbəti ➡️", key="next_btn") and curr_idx < total_q - 1:
-                st.session_state.current_index += 1
-                st.session_state.show_current_answer = False
-                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-        st.markdown("---")
-        
-        # Sual nömrəsinə birbaşa keçid və İmtahanı bitirmə paneli
-        col_foot1, col_foot2 = st.columns([2, 1])
-        with col_foot1:
-            sual_no_input = st.text_input("Sual nömrəsinə keç:", value=str(curr_idx + 1))
-            if st.button("Git / Keç"):
+            st.markdown("<br><br>", unsafe_allow_html=True)
+            sual_no_input = st.text_input("Sual nömrəsi:", value=str(curr_idx + 1))
+            if st.button("Keç"):
                 try:
                     target_idx = int(sual_no_input) - 1
                     if 0 <= target_idx < total_q:
@@ -242,10 +158,36 @@ else:
                         st.rerun()
                 except:
                     pass
-        with col_foot2:
-            st.markdown("<br>" if not st.sidebar.checkbox else "", unsafe_allow_html=True) # Boşluq nizamı
+
+        with col_center:
+            st.markdown(f"<div class='sual-karti'><h3>{q['question']}</h3></div>", unsafe_allow_html=True)
+            
+            current_choice = st.session_state.user_answers.get(curr_idx, None)
+            options = q['options']
+            
+            user_choice = st.radio(
+                f"options_{curr_idx}", 
+                options, 
+                index=options.index(current_choice) if current_choice in options else None, 
+                key=f"radio_{curr_idx}", 
+                label_visibility="collapsed"
+            )
+            
+            if user_choice:
+                st.session_state.user_answers[curr_idx] = user_choice
+
+        with col_right:
+            st.markdown('<div class="blue-btn">', unsafe_allow_html=True)
+            if st.button("Növbəti ➡️", key="next_btn") and curr_idx < total_q - 1:
+                st.session_state.current_index += 1
+                st.session_state.show_current_answer = False
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+            st.markdown("<br><br><br>", unsafe_allow_html=True)
+            
             st.markdown('<div class="bitir-btn">', unsafe_allow_html=True)
-            if st.button("İmtahanı Bitir", key="submit_exam_btn"):
+            if st.button("Bitir", key="submit_exam_btn"):
                 st.session_state.submitted = True
                 st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
@@ -268,9 +210,9 @@ else:
         
         st.markdown("## 📊 İmtahan Nəticəsi")
         col1, col2, col3 = st.columns(3)
-        col1.metric("Doğru", f"✅ {correct_count}")
-        col2.metric("Səhv", f"❌ {wrong_count}")
-        col3.metric("Boş", f"⚪ {unanswered_count}")
+        col1.metric("Doğru Cavab", f"✅ {correct_count}")
+        col2.metric("Səhv Cavab", f"❌ {wrong_count}")
+        col3.metric("Boş Buraxılan", f"⚪ {unanswered_count}")
         
         st.markdown("---")
         if st.button("🔄 Yeni İmtahana Başla"):
