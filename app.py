@@ -116,9 +116,14 @@ else:
             
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # CAVABI GÖSTƏR DÜYMƏSİ
+            # CAVABI GÖSTƏR DÜYMƏSİ (Məntiq tamamilə yeniləndi)
             if st.button("👁️ Cavabı göstər", key="show_ans_btn"):
                 st.session_state.show_current_answer = not st.session_state.show_current_answer
+                if st.session_state.show_current_answer:
+                    st.session_state.user_answers[curr_idx] = q['correct']
+                else:
+                    if curr_idx in st.session_state.user_answers:
+                        del st.session_state.user_answers[curr_idx]
                 st.rerun()
             
             st.markdown("<br><br>", unsafe_allow_html=True)
@@ -137,36 +142,16 @@ else:
             st.markdown(f"<div class='sual-karti'><h3>{q['question']}</h3></div>", unsafe_allow_html=True)
             
             options = q['options']
+            current_choice = st.session_state.user_answers.get(curr_idx, None)
             
-            # Əgər "Cavabı göstər" sıxılıbsa düzgün cavabı avtomatik işarələyir
-            if st.session_state.get("show_current_answer", False):
-                current_choice = q['correct']
+            # İndeksi təhlükəsiz şəkildə tapırıq
+            if current_choice in options:
+                actual_index = options.index(current_choice)
             else:
-                current_choice = st.session_state.user_answers.get(curr_idx, None)
+                actual_index = None
             
             user_choice = st.radio(
                 f"options_{curr_idx}", 
                 options, 
-                index=options.index(current_choice) if current_choice in options else None, 
-                key=f"radio_{curr_idx}", 
-                label_visibility="collapsed"
-            )
-            
-            if user_choice:
-                st.session_state.user_answers[curr_idx] = user_choice
-
-        with col_right:
-            st.markdown('<div class="blue-btn">', unsafe_allow_html=True)
-            if st.button("Növbəti ➡️", key="next_btn") and curr_idx < total_q - 1:
-                st.session_state.current_index += 1
-                st.session_state.show_current_answer = False
-                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            st.markdown("<br><br><br>", unsafe_allow_html=True)
-            
-            st.markdown('<div class="bitir-btn">', unsafe_allow_html=True)
-            if st.button("Bitir", key="submit_exam_btn"):
-                st.session_state.submitted = True
-                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+                index=actual_index, 
+                key=f"radio_{curr_idx}",
