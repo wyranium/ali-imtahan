@@ -170,6 +170,3 @@ else:
                 st.session_state.submitted = True
                 st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
-
-    # NƏTİCƏ REJİMİ (Xətalı olan və yarımçıq qalan sətir bura idi, tamamilə düzəldildi)
-    elif st.session_state.get("submitted", False):
