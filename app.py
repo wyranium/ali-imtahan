@@ -4,89 +4,62 @@ import random
 
 st.set_page_config(page_title="UNEC İmtahan Sistemi", layout="wide", initial_sidebar_state="expanded")
 
-# "Cavabı göstər" sıxılıbsa və imtahan aktivdirsə, düzgün variantın sırasını tapıb CSS qoşuruq
-css_injection = ""
-if st.session_state.get("exam_started", False) and not st.session_state.get("submitted", False):
-    if st.session_state.get("show_current_answer", False) and "exam_questions" in st.session_state:
-        questions = st.session_state.exam_questions
-        curr_idx = st.session_state.current_index
-        
-        # Təhlükəsizlik yoxlanışı (Siyahı limitini aşmamaq üçün)
-        if 0 <= curr_idx < len(questions):
-            q = questions[curr_idx]
-            correct_text = q['correct']
-            options = q['options']
-            
-            if correct_text in options:
-                correct_position = options.index(correct_text) + 1
-                # Heç bir mətndən və dırnaqdan asılı olmayan, birbaşa sıraya yönələn 100% stabil CSS
-                css_injection = f"""
-                <style>
-                div[role="radiogroup"] div[data-baseweb="radio"]:nth-of-type({correct_position}) {{
-                    border: 2px solid #10B981 !important;
-                    background-color: #064E3B !important;
-                    border-radius: 8px !important;
-                }}
-                </style>
-                """
-
-# Sənin bəyəndiyin ƏSAS KOMPÜTER DIZAYNI (CSS)
-st.markdown(f"""
+# Əsas CSS Dizaynı (Xəta verən dinamik çərçivə kodu buradan tamamilə silindi)
+st.markdown("""
     <style>
-    .stApp {{
+    .stApp {
         background-color: #0B0E14;
         color: #D1D5DB;
-    }}
-    h1, h2, h3 {{
+    }
+    h1, h2, h3 {
         color: #FFFFFF !important;
-    }}
-    .sual-header {{
+    }
+    .sual-header {
         font-size: 18px;
         color: #8892B0;
         margin-bottom: 20px;
-    }}
-    .sual-karti {{
+    }
+    .sual-karti {
         background-color: #111622;
         border: 1px solid #1F293D;
         border-radius: 10px;
         padding: 30px;
         margin-bottom: 20px;
-    }}
-    div[data-baseweb="radio"] {{
+    }
+    div[data-baseweb="radio"] {
         background-color: #161B26 !important;
         padding: 14px 20px !important;
         border-radius: 8px !important;
         margin-bottom: 12px !important;
         border: 1px solid #242F41 !important;
         transition: 0.1s;
-    }}
-    div[data-baseweb="radio"]:hover {{
+    }
+    div[data-baseweb="radio"]:hover {
         border-color: #3B82F6 !important;
-    }}
-    .stRadio > label {{
+    }
+    .stRadio > label {
         color: #FFFFFF !important;
         font-size: 16px !important;
     }}
-    .stButton > button {{
+    .stButton > button {
         width: 100% !important;
         background-color: #1F293D !important;
         color: #FFFFFF !important;
         border: 1px solid #374151 !important;
         border-radius: 6px !important;
         padding: 10px 20px !important;
-    }}
+    }
     div[data-testid="stSidebar"] .stButton > button,
-    .blue-btn > div > button {{
+    .blue-btn > div > button {
         background-color: #1D4ED8 !important;
         border: none !important;
-    }}
-    .bitir-btn > div > button {{
+    }
+    .bitir-btn > div > button {
         background-color: #2563EB !important;
         font-weight: bold !important;
         border: none !important;
-    }}
+    }
     </style>
-    {css_injection}
 """, unsafe_allow_html=True)
 
 try:
@@ -124,7 +97,7 @@ else:
         st.session_state.user_answers = {}
         st.rerun()
 
-    # SƏNİN İSTƏDİYİN 3 SÜTUNLU KÖHNƏ İMTAHAN REJİMİ
+    # İMTAHAN REJİMİ
     if st.session_state.get("exam_started", False) and not st.session_state.get("submitted", False):
         questions = st.session_state.exam_questions
         curr_idx = st.session_state.current_index
@@ -133,7 +106,6 @@ else:
         
         st.markdown(f"<div class='sual-header'>muh mexanikasi • Sual {curr_idx + 1}/{total_q}</div>", unsafe_allow_html=True)
         
-        # 3 Sütunlu düzülüş (Sol, Mərkəz, Sağ)
         col_left, col_center, col_right = st.columns([2, 6, 2])
         
         with col_left:
@@ -164,8 +136,14 @@ else:
         with col_center:
             st.markdown(f"<div class='sual-karti'><h3>{q['question']}</h3></div>", unsafe_allow_html=True)
             
-            current_choice = st.session_state.user_answers.get(curr_idx, None)
             options = q['options']
+            
+            # İndeksi təyin edirik: Əgər "Cavabı göstər" sıxılıbsa birbaşa düzgün cavabı aktiv edir, 
+            # yoxsa istifadəçinin öz seçdiyi cavabı saxlayır.
+            if st.session_state.get("show_current_answer", False):
+                current_choice = q['correct']
+            else:
+                current_choice = st.session_state.user_answers.get(curr_idx, None)
             
             user_choice = st.radio(
                 f"options_{curr_idx}", 
@@ -195,29 +173,4 @@ else:
             st.markdown('</div>', unsafe_allow_html=True)
 
     # NƏTİCƏ REJİMİ
-    elif st.session_state.get("submitted", False):
-        questions = st.session_state.exam_questions
-        correct_count = 0
-        wrong_count = 0
-        unanswered_count = 0
-        
-        for idx, q in enumerate(questions):
-            user_ans = st.session_state.user_answers.get(idx, None)
-            if user_ans == q['correct']:
-                correct_count += 1
-            elif user_ans is None:
-                unanswered_count += 1
-            else:
-                wrong_count += 1
-        
-        st.markdown("## 📊 İmtahan Nəticəsi")
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Doğru Cavab", f"✅ {correct_count}")
-        col2.metric("Səhv Cavab", f"❌ {wrong_count}")
-        col3.metric("Boş Buraxılan", f"⚪ {unanswered_count}")
-        
-        st.markdown("---")
-        if st.button("🔄 Yeni İmtahana Başla"):
-            st.session_state.exam_started = False
-            st.session_state.submitted = False
-            st.rerun()
+    elif st.session_state.get
