@@ -116,7 +116,7 @@ else:
             
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # CAVABI GÖSTƏR DÜYMƏSİ (Məntiq tamamilə yeniləndi)
+            # CAVABI GÖSTƏR DÜYMƏSİ
             if st.button("👁️ Cavabı göstər", key="show_ans_btn"):
                 st.session_state.show_current_answer = not st.session_state.show_current_answer
                 if st.session_state.show_current_answer:
@@ -144,7 +144,7 @@ else:
             options = q['options']
             current_choice = st.session_state.user_answers.get(curr_idx, None)
             
-            # İndeksi təhlükəsiz şəkildə tapırıq
+            # İndeksi tapırıq və mötərizəni dəqiq bağlayırıq
             if current_choice in options:
                 actual_index = options.index(current_choice)
             else:
@@ -154,4 +154,53 @@ else:
                 f"options_{curr_idx}", 
                 options, 
                 index=actual_index, 
-                key=f"radio_{curr_idx}",
+                key=f"radio_{curr_idx}", 
+                label_visibility="collapsed"
+            )
+            
+            if user_choice and user_choice != current_choice:
+                st.session_state.user_answers[curr_idx] = user_choice
+
+        with col_right:
+            st.markdown('<div class="blue-btn">', unsafe_allow_html=True)
+            if st.button("Növbəti ➡️", key="next_btn") and curr_idx < total_q - 1:
+                st.session_state.current_index = curr_idx + 1
+                st.session_state.show_current_answer = False
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+            st.markdown("<br><br><br>", unsafe_allow_html=True)
+            
+            st.markdown('<div class="bitir-btn">', unsafe_allow_html=True)
+            if st.button("Bitir", key="submit_exam_btn"):
+                st.session_state.submitted = True
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    # NƏTİCƏ REJİMİ
+    elif st.session_state.get("submitted", False):
+        questions = st.session_state.exam_questions
+        correct_count = 0
+        wrong_count = 0
+        unanswered_count = 0
+        
+        for idx, q in enumerate(questions):
+            user_ans = st.session_state.user_answers.get(idx, None)
+            if user_ans == q['correct']:
+                correct_count += 1
+            elif user_ans is None:
+                unanswered_count += 1
+            else:
+                wrong_count += 1
+        
+        st.markdown("## 📊 İmtahan Nəticəsi")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Doğru Cavab", f"✅ {correct_count}")
+        col2.metric("Səhv Cavab", f"❌ {wrong_count}")
+        col3.metric("Boş Buraxılan", f"⚪ {unanswered_count}")
+        
+        st.markdown("---")
+        if st.button("🔄 Yeni İmtahana Başla"):
+            st.session_state.exam_started = False
+            st.session_state.submitted = False
+            st.rerun()
